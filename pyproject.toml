@@ -1,0 +1,18 @@
+[project]
+name = "dicom-anon"
+version = "0.1.0"
+description = "DICOM 헤더 PHI 익명화 CLI"
+readme = "README.md"
+requires-python = ">=3.8"
+license = { text = "MIT" }
+dependencies = ["pydicom"]
+
+[project.scripts]
+dicom-anon = "anon_dicom:main"
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+py-modules = ["anon_dicom"]

@@ -73,8 +73,7 @@ def main(argv=None):
 
     files = collect(args.paths)
     if not files:
-        print("사용법: anon_dicom 파일.dcm [파일2 폴더 ...] [-o 출력폴더]")
-        print("        (또는 exe 위에 DICOM 파일을 드래그해서 놓기)")
+        print("사용법: dicom-anon 파일.dcm [파일2 폴더 ...] [-o 출력폴더]")
         return 0
     if args.outdir:
         os.makedirs(args.outdir, exist_ok=True)
@@ -99,11 +98,4 @@ def main(argv=None):
 
 
 if __name__ == "__main__":
-    code = main()
-    # 더블클릭/드래그로 실행됐을 땐 창이 바로 닫히지 않게
-    if sys.stdin and sys.stdin.isatty() and len(sys.argv) <= 1:
-        try:
-            input("\nEnter 키를 누르면 닫힙니다...")
-        except EOFError:
-            pass
-    sys.exit(code)
+    sys.exit(main())
