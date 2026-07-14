@@ -1,45 +1,89 @@
-# dicom_anon
+# dicom_anon — DICOM 환자정보 지우개
 
-DICOM 파일 헤더의 환자정보(PHI)를 익명화하는 간단한 CLI 도구입니다.
+CD나 PACS에서 받은 DICOM 파일에는 **환자 이름, 등록번호, 생년월일, 병원 이름** 같은
+개인정보가 들어 있습니다. 이 도구는 그런 정보를 자동으로 지워서, 학회 발표나 논문·연구에
+안전하게 쓸 수 있는 파일을 새로 만들어 줍니다.
 
-환자 이름·ID·생년월일·기관명 등 식별 태그를 비우고, private 태그를 제거하며,
-Study/Series/SOP Instance UID를 새로 발급합니다. 원본은 건드리지 않고 `_anon` 파일을 새로 만듭니다.
+**원본 파일은 그대로 두고, 개인정보만 지운 복사본(`_anon`)을 새로 만듭니다.** 원본이
+사라지거나 망가질 걱정은 없습니다.
 
-> ⚠️ **주의**: 헤더 태그만 익명화합니다. 픽셀 데이터에 새겨진(burned-in) 환자정보나
-> 비표준 위치의 PHI는 제거하지 않습니다. 배포·공유 전 반드시 육안 검수하세요.
+---
 
-## 설치
+## ⚠️ 꼭 읽어주세요
+
+이 도구는 파일 **안에 글자로 적힌** 환자정보를 지웁니다.
+하지만 **화면(영상) 위에 그림처럼 찍혀 있는 환자정보**(예: 초음파 화면 위쪽에 나오는 이름)는
+지우지 못합니다.
+
+👉 그래서 **공유·발표 전에 반드시 눈으로 한 번 확인**하세요.
+
+---
+
+## 사용법 (비개발자용 — 가장 쉬운 방법)
+
+### 1단계. 프로그램 받기
+
+`anon_dicom.exe` 파일을 받아 컴퓨터 바탕화면 등 원하는 곳에 둡니다.
+(설치 필요 없음. 파일 하나만 있으면 됩니다.)
+
+### 2단계. 파일을 프로그램 위에 올려놓기 (드래그 & 드롭)
+
+익명화하고 싶은 DICOM 파일을 마우스로 **끌어다가** `anon_dicom.exe` 아이콘 **위에 놓으면**
+자동으로 실행됩니다. 여러 개를 한꺼번에 올려도 됩니다.
+
+```
+   [내 DICOM 파일]  ──끌어다 놓기──▶  🟦 anon_dicom.exe
+```
+
+### 3단계. 결과 확인
+
+- 잠깐 검은 창이 뜨고 `[완료]` 라고 나오면 끝입니다.
+- 원본 파일 **바로 옆에** `이름_anon.dcm` 이라는 새 파일이 생깁니다. 이게 개인정보가 지워진 파일입니다.
+- (원본이 CD처럼 저장이 안 되는 곳이면, 자동으로 **바탕화면의 `dicom_anon` 폴더**에 저장됩니다.)
+
+> 💡 **폴더째로 처리**: 파일이 여러 개 든 폴더를 통째로 프로그램 위에 올려도 됩니다.
+
+---
+
+## 어떤 정보를 지우나요?
+
+| 종류 | 처리 |
+|------|------|
+| 환자 이름, 등록번호(ID), 생년월일, 성별 | **비움** |
+| 주소, 전화번호, 담당 의사·검사자 이름 | **비움 / 삭제** |
+| 병원 이름, 검사실·장비 이름, 접수번호 | **비움** |
+| 검사 식별번호(UID) | **새 번호로 교체** |
+| 제조사가 몰래 넣은 비공개 정보 | **삭제** |
+
+처리가 끝난 파일에는 "개인정보 제거됨(YES)" 표시가 붙습니다.
+
+---
+
+## 개발자용 (직접 실행하거나 exe 만들기)
+
+파이썬이 설치돼 있다면 exe 없이 바로 쓸 수 있습니다.
 
 ```bash
 pip install -r requirements.txt
-```
 
-## 사용법
-
-```bash
 # 파일 하나
 python anon_dicom.py study.dcm
 
-# 여러 파일 / 폴더(스터디) 통째로
+# 여러 파일 / 폴더 통째로
 python anon_dicom.py case1.dcm ./study_folder
 
 # 출력 폴더 지정
 python anon_dicom.py ./study_folder -o ./anon_out
 ```
 
-Windows에서 exe로 빌드하면 파일을 exe 위에 **드래그&드롭**해서도 쓸 수 있습니다.
+exe 만들기 (Windows):
 
 ```bash
+pip install pyinstaller
 pyinstaller --onefile anon_dicom.py
+# dist\anon_dicom.exe 생성됨
 ```
-
-## 익명화되는 태그
-
-- **비움**: PatientName, PatientID, PatientBirthDate, PatientSex, 각종 Physician/Institution/Station 태그, AccessionNumber, StudyID 등
-- **삭제**: PatientTelephoneNumbers, PatientMotherBirthName, MilitaryRank, 모든 private 태그
-- **재발급**: StudyInstanceUID, SeriesInstanceUID, SOPInstanceUID
-- **표시**: PatientIdentityRemoved = YES
 
 ## 라이선스
 
-MIT
+MIT — 자유롭게 쓰고 고치고 나눠도 됩니다.
